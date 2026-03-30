@@ -13,17 +13,9 @@ h2,h3{font-family:'Playfair Display',serif;color:#4b3832}
 input,button{padding:12px;font-size:16px;margin:6px 0;width:100%;border-radius:10px;border:1px solid #ccc}
 button{background:#6b4f4f;color:#fff}
 
-/* ✅ CHANGED: center rows */
-.grid{
-  display:flex;
-  justify-content:center;
-  gap:6px;
-  margin:6px 0
-}
-
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:6px 0}
 .tile{
   height:45px;
-  width:45px;
   display:flex;
   justify-content:center;
   align-items:center;
@@ -33,21 +25,25 @@ button{background:#6b4f4f;color:#fff}
   transition:.4s;
   transform-style: preserve-3d;
 }
-
 .correct{background:#6aaa64;color:#fff}
 .present{background:#c9b458;color:#fff}
 .absent{background:#d9534f;color:#fff}
 
-.flip { animation: flipAnim 0.5s ease; }
-
+.flip {animation: flipAnim 0.5s ease;}
 @keyframes flipAnim {
-  0%   { transform: rotateX(0); }
-  50%  { transform: rotateX(90deg); }
-  100% { transform: rotateX(0); }
+  0%{transform:rotateX(0);}
+  50%{transform:rotateX(90deg);}
+  100%{transform:rotateX(0);}
 }
 
 .shake{animation:shake .4s}
-@keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}}
+@keyframes shake{
+  0%{transform:translateX(0)}
+  25%{transform:translateX(-5px)}
+  50%{transform:translateX(5px)}
+  75%{transform:translateX(-5px)}
+  100%{transform:translateX(0)}
+}
 
 .keyboard{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:10px}
 .key{padding:10px;border-radius:6px;background:#e0d8cc}
@@ -76,7 +72,12 @@ button{background:#6b4f4f;color:#fff}
 </div>
 
 <script>
-const WORDS = ["book","page","word","read","story","novel"];
+const WORDS = [
+"book","page","word","read","story","novel","poem","author","cover","spine","theme","group","reader","readers","thriller","mystery","fiction","fantasy","romance","horror","SciFi","History","crime","poetry","adult","fable","spine","cover","shelf","stack","cocoa","mocha","fruit","candy","quilt","chips","toast","socks","couch","chair","write","writer","legend","mythic","novel","editor","coffee","muffin","bagel","pastry","sweets","pillow","cushy","latte",
+"text","write","paper","pen","plot","title","index","print","shelf","quote","lounge","cozy","window","quiet","silent","reflect","spine","cover","blurb","secret","secrets","bookend",
+"line","tale","verse","rhyme","genre","draft","edit","bind","ink","story","candle","chair",
+"library","fiction","reader","writer","editor","prose","script","volume","series","chapter","bookmark","binding","publish","imprint","classic","legend","mythic","narrate","dialog","monolog","foreword","epilog","preface","glossary","catalog","archive","journal","essay","review","scribe","codex","folio","quarto","scroll","stanza","syntax","lexicon","motif","trope","canon","fable","parable","sonnet","haiku","satire","irony","symbol","meter","enjamb","caesura","homonym","metonym","synecd","onomato","epithet","glossa","rubric","colophon","incipit","redact","expurg","prosody","versify","alliter","anaphor","epigram","aphorism","ekphras","diegesis","palimps","scribe","script","imprint","preface","epilog","prolog","archive","catalog","journal","monolog","codex","folio","scroll","prolog","epilog","trope","canon","fable","irony","theme","symbol","voice","subplot","pacing","plotline","verse","margins","plot","groups","evening","daytime","relax","unwind"
+];
 
 let name="";
 let target="";
@@ -104,9 +105,19 @@ function startGame(){
  name=document.getElementById("nameInput").value;
  if(!name)return;
 
- target=getWeeklyWord();
- guesses=[];
- gameOver=false;
+ const saved=JSON.parse(localStorage.getItem("bookish-wordle"));
+ const week=getWeekKey();
+
+ if(saved && saved.week===week){
+  target=saved.target;
+  guesses=saved.guesses;
+  gameOver=saved.gameOver;
+ }else{
+  target=getWeeklyWord();
+  guesses=[];
+  gameOver=false;
+  saveGame();
+ }
 
  document.getElementById("start").style.display="none";
  document.getElementById("game").style.display="block";
@@ -117,6 +128,10 @@ function startGame(){
 
  renderBoard();
  createKeyboard();
+}
+
+function saveGame(){
+ localStorage.setItem("bookish-wordle",JSON.stringify({week:getWeekKey(),target,guesses,gameOver}));
 }
 
 function getTileClass(letter,index,guess){
@@ -132,13 +147,11 @@ function renderBoard(){
  for(let r=0;r<MAX_ROWS;r++){
   const row=document.createElement("div");
   row.className="grid";
-
   const guess=guesses[r] || "";
 
   for(let c=0;c<WORD_LENGTH;c++){
     const tile=document.createElement("div");
     tile.className="tile";
-
     const letter=guess[c] || "";
     tile.innerText=letter;
 
@@ -177,6 +190,8 @@ function submitGuess(){
  if(guess===target || guesses.length===MAX_ROWS){
   endGame();
  }
+
+ saveGame();
 }
 
 function endGame(){
@@ -192,6 +207,7 @@ function endGame(){
  }
 
  shareBtn.style.display="block";
+ saveGame();
 }
 
 function createKeyboard(){
@@ -203,42 +219,43 @@ function createKeyboard(){
   const key=document.createElement("div");
   key.innerText=l;
   key.className="key";
-  key.onclick=()=>{
-    document.getElementById("guessInput").value+=l;
-  };
+  key.onclick=()=>{document.getElementById("guessInput").value+=l;};
   kb.appendChild(key);
  });
 }
 
 function updateKeyboard(guess){
-  document.querySelectorAll(".key").forEach(key=>{
-    const letter = key.innerText;
+ document.querySelectorAll(".key").forEach(key=>{
+  const letter = key.innerText;
 
-    if(guess.includes(letter)){
-      if(target.includes(letter)){
-        key.style.background = "#c9b458";
-      } else {
-        key.style.background = "#787c7e";
-      }
+  if(guess.includes(letter)){
+    if(key.classList.contains("correct")) return;
+
+    if([...target].some((l,i)=>l===letter && guess[i]===letter)){
+      key.style.background = "#6aaa64";
+      key.classList.add("correct");
+    } else if(target.includes(letter)){
+      key.style.background = "#c9b458";
+    } else {
+      key.style.background = "#787c7e";
     }
-  });
+  }
+ });
 }
 
-/* ✅ UPDATED: popup share */
 function shareResults(){
   const popup = document.getElementById("popup");
   const popupText = document.getElementById("popupText");
 
   const today = new Date().toLocaleDateString();
-
   const result = guesses.includes(target)
     ? guesses.indexOf(target)+1
     : "X";
 
   popupText.innerHTML = `
-    <b>Congratulations ${name}!</b><br><br>
-    You guessed this week's word! 📖✨<br><br>
-    Guesses: ${result}/5<br>
+    <b>${name}</b><br><br>
+    Great Job! 📖✨<br><br>
+    Score: ${result}/5<br>
     Date: ${today}
   `;
 
@@ -247,14 +264,12 @@ function shareResults(){
 
 function copyResults(){
   const today = new Date().toLocaleDateString();
-
   const result = guesses.includes(target)
     ? guesses.indexOf(target)+1
     : "X";
 
-  const text = `📚 Bookish Wordle
-${name}
-${result}/5
+  const text = `${name}'s Bookish Wordle
+${result}/
 ${today}`;
 
   navigator.clipboard.writeText(text);
@@ -266,12 +281,11 @@ function closePopup(){
 }
 </script>
 
-<!-- ✅ NEW POPUP -->
-<div id="popup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; backdrop-filter:blur(8px); background:rgba(0,0,0,0.2); justify-content:center; align-items:center; z-index:1000;">
-  <div style="background:#fdf6e3; padding:25px; border-radius:16px; text-align:center; width:85%; max-width:320px;">
+<div id="popup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; backdrop-filter:blur(8px); justify-content:center; align-items:center;">
+  <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; width:80%; max-width:300px; box-shadow:0 5px 20px rgba(0,0,0,0.2);">
     <h3>📚 Results</h3>
     <p id="popupText"></p>
-    <button onclick="copyResults()">Copy Results</button>
+    <button onclick="copyResults()">Copy</button>
     <button onclick="closePopup()">Close</button>
   </div>
 </div>
