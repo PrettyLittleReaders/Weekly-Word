@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>📚 Bookish Wordle</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Libre+Baskerville&display=swap" rel="stylesheet">
+
+<style>
+body{margin:0;font-family:'Libre Baskerville',serif;background:#f4f1ea;display:flex;justify-content:center;align-items:center;height:100vh}
+.app{width:100%;max-width:420px;padding:16px;text-align:center}
+h2,h3{font-family:'Playfair Display',serif;color:#4b3832}
+input,button{padding:12px;font-size:16px;margin:6px 0;width:100%;border-radius:10px;border:1px solid #ccc}
+button{background:#6b4f4f;color:#fff}
+
+/* ✅ CHANGED: center rows */
+.grid{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin:6px 0
+}
+
+.tile{
+  height:45px;
+  width:45px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  border-radius:6px;
+  background:#ddd;
+  transition:.4s;
+  transform-style: preserve-3d;
+}
+
+.correct{background:#6aaa64;color:#fff}
+.present{background:#c9b458;color:#fff}
+.absent{background:#d9534f;color:#fff}
+
+.flip { animation: flipAnim 0.5s ease; }
+
+@keyframes flipAnim {
+  0%   { transform: rotateX(0); }
+  50%  { transform: rotateX(90deg); }
+  100% { transform: rotateX(0); }
+}
+
+.shake{animation:shake .4s}
+@keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}}
+
+.keyboard{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:10px}
+.key{padding:10px;border-radius:6px;background:#e0d8cc}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<div id="start">
+<h2>📚 Bookish Wordle</h2>
+<input id="nameInput" placeholder="Enter your name" />
+<button type="button" onclick="startGame()">Start</button>
+</div>
+
+<div id="game" style="display:none;">
+<h3 id="welcome"></h3>
+<div id="board"></div>
+<input id="guessInput" placeholder="Enter guess" />
+<button onclick="submitGuess()">Guess</button>
+<div id="keyboard" class="keyboard"></div>
+<p id="message"></p>
+<button id="shareBtn" style="display:none;" onclick="shareResults()">Share Results</button>
+</div>
+
+</div>
+
+<script>
+const WORDS = ["book","page","word","read","story","novel"];
+
+let name="";
+let target="";
+let guesses=[];
+let gameOver=false;
+
+const MAX_ROWS=5;
+let WORD_LENGTH=0;
+
+function getWeekKey(){
+  const now = new Date();
+  const day = now.getDay();
+  const diff = (day >= 2) ? day - 2 : day + 5;
+  const tuesday = new Date(now);
+  tuesday.setDate(now.getDate() - diff);
+  tuesday.setHours(0,0,0,0);
+  return tuesday.getTime();
+}
+
+function getWeeklyWord(){
+ return WORDS[getWeekKey()%WORDS.length];
+}
+
+function startGame(){
+ name=document.getElementById("nameInput").value;
+ if(!name)return;
+
+ target=getWeeklyWord();
+ guesses=[];
+ gameOver=false;
+
+ document.getElementById("start").style.display="none";
+ document.getElementById("game").style.display="block";
+ document.getElementById("welcome").innerText=`Welcome, ${name}`;
+
+ WORD_LENGTH = target.length;
+ document.getElementById("guessInput").maxLength = WORD_LENGTH;
+
+ renderBoard();
+ createKeyboard();
+}
+
+function getTileClass(letter,index,guess){
+ if(target[index]===letter)return"correct";
+ if(target.includes(letter))return"present";
+ return"absent";
+}
+
+function renderBoard(){
+ const board=document.getElementById("board");
+ board.innerHTML="";
+
+ for(let r=0;r<MAX_ROWS;r++){
+  const row=document.createElement("div");
+  row.className="grid";
+
+  const guess=guesses[r] || "";
+
+  for(let c=0;c<WORD_LENGTH;c++){
+    const tile=document.createElement("div");
+    tile.className="tile";
+
+    const letter=guess[c] || "";
+    tile.innerText=letter;
+
+    if(guess){
+      setTimeout(()=>{
+        tile.classList.add("flip");
+        tile.classList.add(getTileClass(letter,c,guess));
+      },c*150);
+    }
+
+    row.appendChild(tile);
+  }
+
+  board.appendChild(row);
+ }
+}
+
+function submitGuess(){
+ if(gameOver)return;
+
+ const input=document.getElementById("guessInput");
+ const guess=input.value.trim().toLowerCase();
+
+ if(guess.length!==WORD_LENGTH){
+  input.classList.add("shake");
+  setTimeout(()=>input.classList.remove("shake"),400);
+  return;
+ }
+
+ guesses.push(guess);
+ input.value="";
+
+ renderBoard();
+ updateKeyboard(guess);
+
+ if(guess===target || guesses.length===MAX_ROWS){
+  endGame();
+ }
+}
+
+function endGame(){
+ gameOver=true;
+ const msg=document.getElementById("message");
+ const shareBtn=document.getElementById("shareBtn");
+
+ if(guesses.includes(target)){
+  const tries=guesses.indexOf(target)+1;
+  msg.innerText=`Solved in ${tries}/5 tries!`;
+ }else{
+  msg.innerText=`Word was: ${target}`;
+ }
+
+ shareBtn.style.display="block";
+}
+
+function createKeyboard(){
+ const letters="abcdefghijklmnopqrstuvwxyz";
+ const kb=document.getElementById("keyboard");
+ kb.innerHTML="";
+
+ letters.split("").forEach(l=>{
+  const key=document.createElement("div");
+  key.innerText=l;
+  key.className="key";
+  key.onclick=()=>{
+    document.getElementById("guessInput").value+=l;
+  };
+  kb.appendChild(key);
+ });
+}
+
+function updateKeyboard(guess){
+  document.querySelectorAll(".key").forEach(key=>{
+    const letter = key.innerText;
+
+    if(guess.includes(letter)){
+      if(target.includes(letter)){
+        key.style.background = "#c9b458";
+      } else {
+        key.style.background = "#787c7e";
+      }
+    }
+  });
+}
+
+/* ✅ UPDATED: popup share */
+function shareResults(){
+  const popup = document.getElementById("popup");
+  const popupText = document.getElementById("popupText");
+
+  const today = new Date().toLocaleDateString();
+
+  const result = guesses.includes(target)
+    ? guesses.indexOf(target)+1
+    : "X";
+
+  popupText.innerHTML = `
+    <b>Congratulations ${name}!</b><br><br>
+    You guessed this week's word! 📖✨<br><br>
+    Guesses: ${result}/5<br>
+    Date: ${today}
+  `;
+
+  popup.style.display = "flex";
+}
+
+function copyResults(){
+  const today = new Date().toLocaleDateString();
+
+  const result = guesses.includes(target)
+    ? guesses.indexOf(target)+1
+    : "X";
+
+  const text = `📚 Bookish Wordle
+${name}
+${result}/5
+${today}`;
+
+  navigator.clipboard.writeText(text);
+  alert("Copied! 📖✨");
+}
+
+function closePopup(){
+  document.getElementById("popup").style.display = "none";
+}
+</script>
+
+<!-- ✅ NEW POPUP -->
+<div id="popup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; backdrop-filter:blur(8px); background:rgba(0,0,0,0.2); justify-content:center; align-items:center; z-index:1000;">
+  <div style="background:#fdf6e3; padding:25px; border-radius:16px; text-align:center; width:85%; max-width:320px;">
+    <h3>📚 Results</h3>
+    <p id="popupText"></p>
+    <button onclick="copyResults()">Copy Results</button>
+    <button onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+</body>
+</html>
