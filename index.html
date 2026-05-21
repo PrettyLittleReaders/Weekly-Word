@@ -542,14 +542,19 @@ function closePopup(){
 }
 </script>
 
-<div id="popup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:9999;">
-  <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; width:80%; max-width:300px; box-shadow:0 5px 20px rgba(0,0,0,0.2);">
-    <h3>📚 Results</h3>
-    <p id="popupText"></p>
-    <button onclick="copyResults()">Copy</button>
-    <button onclick="closePopup()">Close</button>
-  </div>
-</div>
+#popup{
+  display:none;
+  position:fixed;
+  inset:0;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  backdrop-filter:blur(8px);
+
+  z-index:9999;
+}
 
 </body>
 </html>
