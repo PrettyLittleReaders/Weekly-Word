@@ -18,8 +18,10 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  height:100vh;
-  overflow:hidden;
+  min-height:100vh;
+overflow-x:hidden;
+padding:20px 10px;
+box-sizing:border-box;
   position:relative;
 }
 
@@ -34,6 +36,7 @@ body::before{
   right:-200px;
   filter:blur(30px);
   animation:floatGlow 8s ease-in-out infinite alternate;
+  z-index:0;
 }
 
 @keyframes floatGlow{
@@ -105,6 +108,7 @@ button:hover{
   justify-content:center;
   gap:8px;
   margin:8px 0;
+  flex-wrap:wrap;
 }
 
 .tile{
@@ -221,7 +225,7 @@ button:hover{
   height:100%;
   overflow:hidden;
   pointer-events:none;
-  z-index:0;
+  z-index:1;
 }
 
 .page{
@@ -285,7 +289,7 @@ button:hover{
 <div class="app">
 
 <div id="start">
-<h2>📚 Bookish Wordle</h2>
+<h2>📚PLR Weekly Word📚</h2>
 <input id="nameInput" placeholder="Enter your name" />
 <button type="button" onclick="startGame()">Start</button>
 </div>
@@ -304,7 +308,7 @@ button:hover{
 
 <script>
 const WORDS = [
-"book","page","word","read","story","novel","poem","author","cover","spine","theme","group","reader","readers","thriller","mystery","fiction","fantasy","romance","horror","SciFi","History","crime","poetry","adult","fable","spine","cover","shelf","stack","cocoa","mocha","fruit","candy","quilt","chips","toast","socks","couch","chair","write","writer","legend","mythic","novel","editor","coffee","muffin","bagel","pastry","sweets","pillow","cushy","latte",
+"book","page","word","read","story","novel","poem","author","cover","spine","theme","group","reader","readers","thriller","mystery","fiction","fantasy","romance","horror","Scifi","History","crime","poetry","adult","fable","spine","cover","shelf","stack","cocoa","mocha","fruit","candy","quilt","chips","toast","socks","couch","chair","write","writer","legend","mythic","novel","editor","coffee","muffin","bagel","pastry","sweets","pillow","cushy","latte",
 "text","write","paper","pen","plot","title","index","print","shelf","quote","lounge","cozy","window","quiet","silent","reflect","spine","cover","blurb","secret","secrets","bookend",
 "line","tale","verse","rhyme","genre","draft","edit","bind","ink","story","candle","chair",
 "library","fiction","reader","writer","editor","prose","script","volume","series","chapter","bookmark","binding","publish","imprint","classic","legend","mythic","narrate","dialog","monolog","foreword","epilog","preface","glossary","catalog","archive","journal","essay","review","scribe","codex","folio","quarto","scroll","stanza","syntax","lexicon","motif","trope","canon","fable","parable","sonnet","haiku","satire","irony","symbol","scribe","script","imprint","preface","epilog","prolog","archive","catalog","journal","monolog","codex","folio","scroll","prolog","epilog","trope","canon","fable","irony","theme","symbol","voice","subplot","pacing","plotline","verse","margins","plot","groups","evening","daytime","relax","unwind"
