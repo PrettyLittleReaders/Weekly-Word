@@ -12,8 +12,8 @@ body{
   font-family:'Libre Baskerville',serif;
 
   background:
-    radial-gradient(circle at top, rgba(255,230,180,.35), transparFent 40%),
-    linear-gradient(135deg,#2b1f1a,#4b3832,#241815);F
+    radial-gradient(circle at top, rgba(255,230,180,.35), transparent 40%),
+    linear-gradient(135deg,#2b1f1a,#4b3832,#241815);
 
   display:flex;
   justify-content:center;
@@ -276,6 +276,33 @@ button:hover{
     opacity:0;
   }
 }
+
+#popup{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+
+  justify-content:center;
+  align-items:center;
+
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(8px);
+}
+
+#popup.show{
+  display:flex;
+}
+
+#popup > div{
+  background:linear-gradient(145deg,#fff7eb,#f2e1c2);
+  padding:20px;
+  border-radius:12px;
+  text-align:center;
+  width:80%;
+  max-width:300px;
+  box-shadow:0 12px 40px rgba(0,0,0,.4);
+} 
   
 </style>
 </head>
@@ -337,7 +364,7 @@ function startGame(){
  name=document.getElementById("nameInput").value;
  if(!name)return;
 
- const saved=JSON.parse(localStorage.getItem("bookish-wordle"));
+ const saved = JSON.parse(localStorage.getItem("bookish-wordle") || "null");
  const week=getWeekKey();
 
  if(saved && saved.week===week){
@@ -491,7 +518,7 @@ function shareResults(){
     Date: ${today}
   `;
 
-  popup.style.display = "flex";
+  popup.classList.add("show");
 }
 
 function copyResults(){
@@ -538,23 +565,18 @@ function createPage(){
 setInterval(createPage,700);
   
 function closePopup(){
-  document.getElementById("popup").style.display = "none";
-}
-
-  #popup{
-  display:none;
-  position:fixed;
-  inset:0;
-
-  display:flex;
-  justify-content:center;
-  align-items:center;
-
-  backdrop-filter:blur(8px);
-
-  z-index:9999;
+  document.getElementById("popup").classList.remove("show");
 }
 </script>
 
+<div id="popup">
+  <div>
+    <h3>📚 Results</h3>
+    <p id="popupText"></p>
+    <button onclick="copyResults()">Copy</button>
+    <button onclick="closePopup()">Close</button>
+  </div>
+</div>  
+  
 </body>
 </html>
