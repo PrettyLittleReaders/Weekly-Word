@@ -279,6 +279,8 @@ button:hover{
 </style>
 </head>
 <body>
+  
+<div class="pages" id="pages"></div>
 
 <div class="app">
 
@@ -505,6 +507,35 @@ ${today}`;
   alert("Copied! 📖✨");
 }
 
+function createPage(){
+  const page = document.createElement("div");
+  page.className = "page";
+
+  page.style.left = Math.random() * window.innerWidth + "px";
+
+  const size = 20 + Math.random() * 18;
+
+  page.style.width = size + "px";
+  page.style.height = size * 1.3 + "px";
+
+  page.style.animationDuration =
+    6 + Math.random() * 8 + "s";
+
+  page.style.opacity =
+    0.3 + Math.random() * 0.5;
+
+  page.style.transform =
+    `rotate(${Math.random()*360}deg)`;
+
+  document.getElementById("pages").appendChild(page);
+
+  setTimeout(()=>{
+    page.remove();
+  },14000);
+}
+
+setInterval(createPage,700);
+  
 function closePopup(){
   document.getElementById("popup").style.display = "none";
 }
